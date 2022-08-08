@@ -71,7 +71,7 @@ func Poll(fdSet []PollFd, timeout time.Duration) (int, error) {
 	hdr := (*reflect.SliceHeader)(unsafe.Pointer(&fdSet))
 	n, _, e := syscall.Syscall6(syscall.SYS_POLL, hdr.Data, nFds, uintptr(duration), 0, 0, 0)
 	if n < 0 {
-		return 0, e
+		return 0, wrap(e)
 	}
 	return int(n), nil
 }
@@ -100,7 +100,7 @@ func WaitInput(fd int, timeout time.Duration) error {
 		return ErrInvalidFd
 	}
 	if e&(POLLERR|POLLHUP|POLLRDHUP|POLLREMOVE) > 0 {
-		return Error(e.String())
+		return Error{e.String(), nil}
 	}
 	return nil
 }
